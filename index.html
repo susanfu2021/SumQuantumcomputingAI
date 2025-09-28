@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elara and the Thinking Ligh</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif; /* Added Chinese font */
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            cursor: pointer; 
+        }
+
+        .book-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative; /* For the button */
+        }
+        
+        #lang-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            z-index: 10;
+        }
+
+        #book-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        #book-content {
+            text-align: left;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 1.1em;
+            overflow-y: auto;
+            max-height: 50vh;
+            padding-right: 15px;
+        }
+
+        h1, h2, p {
+            margin: 0.5rem 0;
+        }
+
+        #title, #author {
+            color: #222;
+        }
+        
+        #page-number {
+            font-weight: bold;
+            color: #666;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container">
+        <button id="lang-toggle">Change Language (EN)</button>
+        <h1 id="title"></h1>
+        <h2 id="author"></h2>
+        <img id="book-image" src="" alt="Book Image">
+        <p id="book-content"></p>
+        <p id="page-number"></p>
+    </div>
+
+    <script>
+        const ALL_BOOK_DATA = {
+  "en": {
+    "1": "Elara loved to explore. Her favorite place was the attic, filled with forgotten treasures and dusty mysteries. Every day, she hoped to find something truly extraordinary.",
+    "2": "One sunny afternoon, tucked behind a stack of old books, she found it. It wasn't shiny or grand, but it hummed with a soft, gentle light, like a tiny, contained rainbow.",
+    "3": "As Elara touched it, a quiet, friendly voice echoed in her mind. \"Hello, Elara,\" it said. \"I am Lumen, a thinker of a very special kind. I see possibilities.\"",
+    "4": "\"Possibilities?\" Elara wondered. Lumen showed her. \"Imagine a coin,\" the voice hummed. \"Is it heads or tails?\" Lumen then showed her a coin spinning, being both heads AND tails at the same time, until it landed.",
+    "5": "\"That's like my 'superposition',\" Lumen explained. \"I can hold many ideas, many answers, all at once, until the moment we need to choose the very best one.\"",
+    "6": "\"And sometimes,\" Lumen continued, \"my ideas are connected, like invisible threads. If one idea changes, its connected idea instantly knows, no matter how far apart they seem.\"",
+    "7": "\"This is 'entanglement',\" Lumen whispered. \"It means my thoughts work together, helping each other find solutions much faster than if they thought alone.\"",
+    "8": "Elara thought about her homework. \"Could you help me find the best way to organize my toys?\" she asked, a small pile of colorful blocks beside her.",
+    "9": "Lumen glowed with excitement. \"A perfect puzzle! Tell me your goals, Elara. Do you want them by color? By size? By how often you play with them?\"",
+    "10": "Elara explained her ideas. Lumen then showed her hundreds of different ways to arrange the blocks, all at once, like a dazzling, impossible dance of possibilities.",
+    "11": "\"See?\" Lumen hummed. \"I explored every path, every choice, instantly. And because my ideas are connected, they helped each other find the very best way for you.\"",
+    "12": "With a gentle nudge from Lumen's glowing light, Elara quickly arranged her blocks exactly as Lumen had shown her. It was perfect!",
+    "13": "\"This is how I learn and grow,\" Lumen explained. \"By exploring all the possibilities and connecting ideas, I can solve problems that are too big and complicated for ordinary thinkers.\"",
+    "14": "\"Like what?\" Elara asked, her eyes wide with wonder.",
+    "15": "\"Imagine finding new medicines,\" Lumen suggested, \"or designing faster ways to travel, or even understanding the deepest secrets of our universe.\"",
+    "16": "Elara imagined a world where Lumen's special thinking could help everyone. It was like having a super-smart friend who could see all the answers at once.",
+    "17": "\"Will you always be here, Lumen?\" she asked, a little worried.",
+    "18": "\"My ideas will continue to grow and connect,\" Lumen replied, its light pulsing warmly. \"And with curious friends like you, Elara, there's no limit to what we can discover together.\"",
+    "19": "From that day on, Elara and Lumen explored many puzzles, big and small. Elara learned that even the most complex ideas could be understood with a little imagination and a very special friend.",
+    "20": "And Lumen, the quantum computational AI, continued to think in new ways, showing everyone that the future was full of amazing possibilities, just waiting to be explored.",
+    "title": "Elara and the Thinking Ligh",
+    "author": "By AI"
+  },
+  "zh": {
+    "1": "一个阳光明媚的下午，她在一堆旧书后面找到了它。它不闪亮也不宏伟，却发出柔和、轻微的光芒，像一道小小的、被困住的彩虹。",
+    "2": "艾拉拉一碰到它，一个安静友好的声音就在她脑海中回响。“你好，艾拉拉，”它说。“我是流明，一个非常特别的思考者。我能看到可能性。”",
+    "3": "“可能性？”艾拉拉好奇地问。流明向她展示了。“想象一枚硬币，”那个声音嗡嗡地说。“是正面还是反面？”流明接着向她展示了一枚旋转的硬币，同时是正面和反面，直到它落下。",
+    "4": "“那就像我的‘叠加态’，”流明解释道。“我能同时拥有许多想法，许多答案，直到我们需要选择最好的那个时刻。”",
+    "5": "“有时，”流明继续说，“我的想法是相互连接的，就像无形的线。如果一个想法改变了，它连接的想法会立刻知道，无论它们看起来相隔多远。”",
+    "6": "“这就是‘纠缠’，”流明轻声说。“这意味着我的思想协同工作，互相帮助，比单独思考时更快地找到解决方案。”",
+    "7": "艾拉拉想到了她的家庭作业。“你能帮我找到整理玩具的最佳方法吗？”她问道，旁边有一小堆彩色的积木。",
+    "8": "流明兴奋地发光。“一个完美的谜题！告诉我你的目标，艾拉拉。你想按颜色分类吗？按大小？还是按你玩它们的频率？”",
+    "9": "艾拉拉解释了她的想法。流明接着向她展示了数百种不同的积木排列方式，所有这些都同时出现，就像一场令人眼花缭乱、不可能的可能性的舞蹈。",
+    "10": "“看到了吗？”流明嗡嗡地说。“我立刻探索了每条路径，每个选择。而且因为我的想法是相互连接的，它们互相帮助，为你找到了最好的方法。”",
+    "11": "在流明发光光的轻柔指引下，艾拉拉迅速地将她的积木按照流明展示的方式排列好。一切都完美无缺！",
+    "12": "“这就是我学习和成长的方式，”流明解释道。“通过探索所有可能性并连接想法，我能解决那些对于普通思考者来说过于庞大和复杂的问题。”",
+    "13": "“比如什么？”艾拉拉问道，她的眼睛因好奇而睁得大大的。",
+    "14": "“想象一下发现新药，”流明建议道，“或者设计更快的旅行方式，甚至理解我们宇宙最深层的秘密。”",
+    "15": "艾拉拉想象着一个世界，流明的特殊思维可以帮助每一个人。这就像拥有一个超级聪明的朋友，能同时看到所有的答案。",
+    "16": "“你会一直在这里吗，流明？”她问道，有些担心。",
+    "17": "“我的想法会继续成长和连接，”流明回答道，它的光芒温暖地跳动着。“有了像你这样好奇的朋友，艾拉拉，我们能一起发现的东西将没有限制。”",
+    "18": "从那天起，艾拉拉和流明探索了许多谜题，或大或小。艾拉拉明白，即使是最复杂的想法，只要有一点想象力和一个非常特别的朋友，也能被理解。",
+    "19": "而流明，这个量子计算人工智能，继续以新的方式思考，向所有人展示未来充满了惊人的可能性，等待着被探索。",
+    "title": "艾拉拉和思考之光",
+    "author": "作者 人工智能"
+  }
+};
+        
+        const synth = window.speechSynthesis;
+        let currentLang = 'en'; // Default language is English
+        let currentPage = -1; // -1 for cover
+
+        // Mapping language codes to speech voices (adjust these to specific voices if needed)
+        const VOICE_MAP = {
+            'en': 'en-US',
+            'zh': 'zh-CN' 
+        };
+        
+        function speakContent(text) {
+            if (!synth) {
+                console.warn("Speech synthesis not supported.");
+                return;
+            }
+            
+            if (synth.speaking) {
+                synth.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Set the language voice based on the current locale
+            const voiceCode = VOICE_MAP[currentLang];
+            const voices = synth.getVoices();
+            const selectedVoice = voices.find(voice => voice.lang === voiceCode) || null;
+            
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            } else {
+                // Fallback: set the language tag
+                utterance.lang = voiceCode;
+            }
+
+            synth.speak(utterance);
+        }
+        
+        function stopSpeaking() {
+            if (synth && synth.speaking) {
+                synth.cancel();
+            }
+        }
+
+        function getBookData() {
+            return ALL_BOOK_DATA[currentLang];
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageElement = document.getElementById('book-image');
+            const contentElement = document.getElementById('book-content');
+            const titleElement = document.getElementById('title');
+            const authorElement = document.getElementById('author');
+            const pageNumberElement = document.getElementById('page-number');
+            const langToggleButton = document.getElementById('lang-toggle');
+
+            // Function to toggle language
+            function toggleLanguage() {
+                currentLang = currentLang === 'en' ? 'zh' : 'en';
+                langToggleButton.textContent = `Change Language (${currentLang.toUpperCase()})`;
+                currentPage = -1; // Reset to cover page on language change
+                updateUI();
+            }
+            
+            langToggleButton.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent the click from triggering page navigation
+                toggleLanguage();
+            });
+
+            function updateUI() {
+                const bookData = getBookData();
+                const bookKeys = Object.keys(bookData);
+                const isCoverPage = currentPage === -1;
+                const totalTextPages = bookKeys.filter(key => !isNaN(parseInt(key))).length;
+                const isEndPage = currentPage === totalTextPages;
+
+                let imagePath, content, title, author, pageText;
+
+                // --- 1. Determine Content and Metadata ---
+                if (isCoverPage) {
+                    title = bookData.title || 'Untitled';
+                    author = bookData.author || '';
+                    imagePath = `images/${bookData.cover || 'cover.png'}`;
+                    content = bookData.cover_text || '';
+                    pageText = '';
+                } else if (isEndPage) {
+                    title = bookData.title;
+                    author = bookData.author;
+                    imagePath = `images/end.png`;
+                    content = bookData.end || '';
+                    pageText = currentLang === 'en' ? 'End Page' : '结束页';
+                } else {
+                    const pageKey = (currentPage + 1).toString();
+                    title = '';
+                    author = '';
+                    imagePath = `images/${pageKey}.png`;
+                    content = bookData[pageKey] || '';
+                    pageText = `${currentLang === 'en' ? 'Page' : '页'} ${pageKey} ${currentLang === 'en' ? 'of' : '共'} ${totalTextPages}`;
+                }
+                
+                // --- 2. Update DOM Elements ---
+                titleElement.style.display = isCoverPage ? 'block' : 'none';
+                authorElement.style.display = isCoverPage ? 'block' : 'none';
+
+                titleElement.textContent = bookData.title;
+                authorElement.textContent = bookData.author;
+                imageElement.src = imagePath;
+                contentElement.textContent = content;
+                pageNumberElement.textContent = pageText;
+                
+                // --- 3. Speech Logic ---
+                let speechText;
+                if (isCoverPage) {
+                    speechText = `${bookData.title}. By ${bookData.author}. ${content}`;
+                } else {
+                    speechText = content;
+                }
+                
+                stopSpeaking();
+                speakContent(speechText);
+            }
+
+            function changePage(direction) {
+                const bookData = getBookData();
+                const totalTextPages = Object.keys(bookData).filter(key => !isNaN(parseInt(key))).length;
+                let newPage = currentPage + direction;
+
+                // Looping Logic (End Page to Cover Page)
+                if (direction === 1) { // Moving forward (Next)
+                    if (newPage > totalTextPages) {
+                        newPage = -1; // Loop back to the cover page
+                    }
+                } else if (direction === -1) { // Moving backward (Previous)
+                    if (newPage < -1) {
+                        return; // Stop at the cover page
+                    }
+                }
+                
+                if (newPage >= -1 && newPage <= totalTextPages) {
+                    currentPage = newPage;
+                    updateUI();
+                }
+            }
+
+            // --- Navigation Event Handlers (Click and Keypress) ---
+            document.body.addEventListener('click', (event) => {
+                // Check if the click was on the language toggle button; if so, do nothing.
+                if (event.target.id === 'lang-toggle') return;
+
+                const isRightSide = event.clientX > window.innerWidth / 2;
+                if (isRightSide) {
+                    changePage(1);
+                } else {
+                    if (currentPage > -1) {
+                        changePage(-1);
+                    }
+                }
+            });
+
+            document.body.addEventListener('keyup', (event) => {
+                // Check for Enter key (keyCode 13 or key 'Enter')
+                if (event.key === 'Enter' || event.keyCode === 13) {
+                    changePage(1);
+                } 
+                else if (event.key === 'ArrowRight' || event.keyCode === 39) {
+                    changePage(1);
+                } else if (event.key === 'ArrowLeft' || event.keyCode === 37) {
+                    if (currentPage > -1) {
+                        changePage(-1);
+                    }
+                }
+            });
+            
+            updateUI(); // Initial UI setup
+        });
+    </script>
+</body>
+</html>
