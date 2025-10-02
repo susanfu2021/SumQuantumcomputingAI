@@ -58,7 +58,7 @@
         #book-content {
             text-align: left;
             margin-top: 1rem;
-            white-space: pre-wrap;
+            /* white-space: pre-wrap; REMOVED to allow HTML rendering */
             line-height: 1.8;
             font-size: 1.1em;
             overflow-y: auto;
@@ -68,6 +68,12 @@
 
         h1, h2, p {
             margin: 0.5rem 0;
+        }
+        
+        a { /* Style for the new link */
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
         }
 
         #title, #author {
@@ -83,7 +89,7 @@
 </head>
 <body>
     <div class="book-container">
-        <button id="lang-toggle">Change Language (EN)</button>
+        <button id="lang-toggle">Chinese</button>
         <h1 id="title"></h1>
         <h2 id="author"></h2>
         <img id="book-image" src="" alt="Book Image">
@@ -146,7 +152,7 @@
         let currentLang = 'en'; // Default language is English
         let currentPage = -1; // -1 for cover
 
-        // Mapping language codes to speech voices (adjust these to specific voices if needed)
+        // Mapping language codes to speech voices
         const VOICE_MAP = {
             'en': 'en-US',
             'zh': 'zh-CN' 
@@ -197,24 +203,41 @@
             const pageNumberElement = document.getElementById('page-number');
             const langToggleButton = document.getElementById('lang-toggle');
 
-            // Function to toggle language
+            // --- Function to toggle language ---
             function toggleLanguage() {
                 currentLang = currentLang === 'en' ? 'zh' : 'en';
-                langToggleButton.textContent = `Change Language (${currentLang.toUpperCase()})`;
-                currentPage = -1; // Reset to cover page on language change
+                
+                // --- Core Change 1: Update button text based on the TARGET language ---
+                if (currentLang === 'zh') {
+                    langToggleButton.textContent = '英文'; // Book is now in Chinese, button offers English
+                } else {
+                    langToggleButton.textContent = 'Chinese'; // Book is now in English, button offers Chinese
+                }
+                
+                // --- Core Change 2: DO NOT reset currentPage, keeping the current page index ---
+                
                 updateUI();
             }
             
             langToggleButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent the click from triggering page navigation
+                event.stopPropagation();
                 toggleLanguage();
             });
+            
+            // Set initial button state (English mode, button says "Chinese")
+            langToggleButton.textContent = 'Chinese'; 
 
             function updateUI() {
                 const bookData = getBookData();
                 const bookKeys = Object.keys(bookData);
-                const isCoverPage = currentPage === -1;
                 const totalTextPages = bookKeys.filter(key => !isNaN(parseInt(key))).length;
+                
+                // Adjust currentPage if it exceeds the maximum number of pages in the new language
+                if (currentPage > totalTextPages) {
+                    currentPage = totalTextPages;
+                }
+
+                const isCoverPage = currentPage === -1;
                 const isEndPage = currentPage === totalTextPages;
 
                 let imagePath, content, title, author, pageText;
@@ -248,15 +271,49 @@
                 titleElement.textContent = bookData.title;
                 authorElement.textContent = bookData.author;
                 imageElement.src = imagePath;
-                contentElement.textContent = content;
                 pageNumberElement.textContent = pageText;
                 
-                // --- 3. Speech Logic ---
+                // --- NEW LINK RENDERING LOGIC ---
+                const linkPrefix = 'URL:';
                 let speechText;
-                if (isCoverPage) {
-                    speechText = `${bookData.title}. By ${bookData.author}. ${content}`;
+
+                if (content.startsWith(linkPrefix)) {
+                    // Content format: URL:Link Text:https://example.com
+                    const linkParts = content.substring(linkPrefix.length).split(':');
+                    
+                    // We expect two parts: Link Text (part 0) and the URL (part 1)
+                    if (linkParts.length >= 2) {
+                        const linkText = linkParts[0].trim();
+                        // The rest of the parts are the full URL (in case it contains more colons)
+                        const url = linkParts.slice(1).join(':').trim(); 
+
+                        // Create the HTML link element
+                        contentElement.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">${linkText}</a>`;
+                        
+                        // Set speech text to announce the link
+                        speechText = currentLang === 'en' 
+                            ? `Check out the link: ${linkText}` 
+                            : `请查看链接: ${linkText}`;
+
+                        // Add back pre-wrap for non-link content to maintain original formatting
+                        contentElement.style.whiteSpace = 'normal'; 
+                    } else {
+                         // Fallback if the link format is invalid, treat as regular text
+                         contentElement.textContent = content;
+                         contentElement.style.whiteSpace = 'pre-wrap';
+                         speechText = content;
+                    }
                 } else {
-                    speechText = content;
+                    // Regular text page content
+                    contentElement.textContent = content;
+                    contentElement.style.whiteSpace = 'pre-wrap';
+                    
+                    // --- 3. Speech Logic for regular content ---
+                    if (isCoverPage) {
+                        speechText = `${bookData.title}. By ${bookData.author}. ${content}`;
+                    } else {
+                        speechText = content;
+                    }
                 }
                 
                 stopSpeaking();
@@ -269,13 +326,13 @@
                 let newPage = currentPage + direction;
 
                 // Looping Logic (End Page to Cover Page)
-                if (direction === 1) { // Moving forward (Next)
+                if (direction === 1) { 
                     if (newPage > totalTextPages) {
-                        newPage = -1; // Loop back to the cover page
+                        newPage = -1; 
                     }
-                } else if (direction === -1) { // Moving backward (Previous)
+                } else if (direction === -1) { 
                     if (newPage < -1) {
-                        return; // Stop at the cover page
+                        return;
                     }
                 }
                 
@@ -287,8 +344,7 @@
 
             // --- Navigation Event Handlers (Click and Keypress) ---
             document.body.addEventListener('click', (event) => {
-                // Check if the click was on the language toggle button; if so, do nothing.
-                if (event.target.id === 'lang-toggle') return;
+                if (event.target.id === 'lang-toggle' || event.target.tagName === 'A') return;
 
                 const isRightSide = event.clientX > window.innerWidth / 2;
                 if (isRightSide) {
@@ -301,13 +357,12 @@
             });
 
             document.body.addEventListener('keyup', (event) => {
-                // Check for Enter key (keyCode 13 or key 'Enter')
-                if (event.key === 'Enter' || event.keyCode === 13) {
+                const isNextKey = event.key === 'Enter' || event.keyCode === 13 || event.key === 'ArrowRight' || event.keyCode === 39;
+                const isPreviousKey = event.key === 'ArrowLeft' || event.keyCode === 37;
+
+                if (isNextKey) {
                     changePage(1);
-                } 
-                else if (event.key === 'ArrowRight' || event.keyCode === 39) {
-                    changePage(1);
-                } else if (event.key === 'ArrowLeft' || event.keyCode === 37) {
+                } else if (isPreviousKey) {
                     if (currentPage > -1) {
                         changePage(-1);
                     }
